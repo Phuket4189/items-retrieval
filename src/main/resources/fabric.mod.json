@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "items-retrieval",
+  "version": "${version}",
+  "name": "items-retrieval",
+  "description": "客户端物品检索辅助模组。打开检索面板后添加要查找的物品，点击执行附近检索或开启持续检索，即可查看附近命中容器并获得高亮与方向提示。",
+  "authors": [
+    "Phuket4189"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Phuket4189/item-retrieval-template-1.21.10",
+    "sources": "https://github.com/Phuket4189/item-retrieval-template-1.21.10"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/items-retrieval/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "org.example.item_retrieval.client.ItemRetrievalModDataGenerator"
+    ],
+    "client": [
+      "org.example.item_retrieval.client.ItemRetrievalModClient"
+    ],
+    "main": [
+      "org.example.item_retrieval.ItemRetrievalMod"
+    ]
+  },
+  "mixins": [
+    "items-retrieval.mixins.json",
+    {
+      "config": "items-retrieval.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
