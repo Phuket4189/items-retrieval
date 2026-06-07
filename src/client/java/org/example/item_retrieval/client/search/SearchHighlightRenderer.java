@@ -12,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.example.item_retrieval.client.config.SearchRuntimeConfig;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -234,12 +235,13 @@ public final class SearchHighlightRenderer {
 
     private static void drawLine(MatrixStack matrices, VertexConsumer consumer, float x1, float y1, float z1, float x2, float y2, float z2, int color) {
         Matrix4f pos = matrices.peek().getPositionMatrix();
+        Matrix3f normal = matrices.peek().getNormalMatrix();
         float r = ((color >> 16) & 0xFF) / 255.0F;
         float g = ((color >> 8) & 0xFF) / 255.0F;
         float b = (color & 0xFF) / 255.0F;
         float a = ((color >> 24) & 0xFF) / 255.0F;
-        consumer.vertex(pos, x1, y1, z1).color(r, g, b, a);
-        consumer.vertex(pos, x2, y2, z2).color(r, g, b, a);
+        consumer.vertex(pos, x1, y1, z1).color(r, g, b, a).normal(normal, 0.0F, 1.0F, 0.0F);
+        consumer.vertex(pos, x2, y2, z2).color(r, g, b, a).normal(normal, 0.0F, 1.0F, 0.0F);
     }
 
     private static int selectPrimaryColor(Map<Item, Integer> matchedTargetCounts, ToIntFunction<Item> colorResolver) {
