@@ -1,7 +1,7 @@
 # Items Retrieval
 
-[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.10-green)](https://www.minecraft.net/)
-[![Fabric Loader](https://img.shields.io/badge/Fabric%20Loader-0.18.1-blue)](https://fabricmc.net/)
+[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.20.6-green)](https://www.minecraft.net/)
+[![Fabric Loader](https://img.shields.io/badge/Fabric%20Loader-0.15.11-blue)](https://fabricmc.net/)
 [![Java Version](https://img.shields.io/badge/Java-21-orange)](https://www.oracle.com/java/)
 
 > 客户端物品检索辅助模组。打开检索面板后添加要查找的物品，点击执行附近检索或开启持续检索，即可查看附近命中容器并获得高亮与方向提示。
@@ -32,11 +32,11 @@
 
 | 类别 | 技术 |
 |------|------|
-| **游戏版本** | Minecraft 1.21.10 |
-| **Mod Loader** | Fabric Loader 0.18.1 |
-| **Mod API** | Fabric API 0.138.4+1.21.10 |
+| **游戏版本** | Minecraft 1.20.6 |
+| **Mod Loader** | Fabric Loader 0.15.11 |
+| **Mod API** | Fabric API 0.97.8+1.20.6 |
 | **编程语言** | Java 21 |
-| **映射** | Yarn 1.21.10+build.3 |
+| **映射** | Yarn 1.20.6+build.3 |
 | **构建工具** | Gradle + fabric-loom |
 | **代码注入** | Mixin |
 | **输入处理** | LWJGL / GLFW |

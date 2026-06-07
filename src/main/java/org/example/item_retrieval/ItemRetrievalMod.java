@@ -21,7 +21,7 @@ public class ItemRetrievalMod implements ModInitializer {
 
     /** 客户端检索面板使用的 ScreenHandler 类型。 */
     public static final ScreenHandlerType<SearchScreenHandler> SEARCH_SCREEN_HANDLER =
-            new ScreenHandlerType<>(SearchScreenHandler::new, FeatureFlags.VANILLA_FEATURES);
+            new ScreenHandlerType<>(SearchScreenHandler::new, FeatureFlags.VANILLA);
 
     @Override
     public void onInitialize() {

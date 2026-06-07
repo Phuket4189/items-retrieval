@@ -1,19 +1,15 @@
 package org.example.item_retrieval.client.search;
 
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexRendering;
+import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -37,25 +33,23 @@ public final class SearchHighlightRenderer {
 
     /**
      * 鍗曠嫭鏋勫缓涓€鏉℃棤娣卞害娴嬭瘯鐨勭嚎妗嗙绾匡紝璁╁鍣?瀹炰綋鏍囪鍙互闅斿鍙銆?
-     * 淇濈暀鍘熺増 lines snippet 鐨勭嚎瀹姐€佹贩鍚堝拰椤剁偣鏍煎紡閰嶇疆锛屽彧瑕嗙洊娣卞害鐩稿叧鐘舵€併€?
+     * 1.20.6 鐗堟湰浣跨敤 RenderLayer.of() 鐩存帴鏋勫缓锛屾棤 RenderPipeline builder API銆?
      */
-    private static final RenderPipeline HIGHLIGHT_LINES_NO_DEPTH_PIPELINE = RenderPipeline.builder(RenderPipelines.RENDERTYPE_LINES_SNIPPET)
-        .withLocation(Identifier.of(SearchRuntimeConfig.MOD_ID, "pipeline/search_highlight_lines_no_depth"))
-        .withBlend(BlendFunction.TRANSLUCENT)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-        .withDepthWrite(false)
-        .withCull(false)
-        .withVertexFormat(VertexFormats.POSITION_COLOR_NORMAL, com.mojang.blaze3d.vertex.VertexFormat.DrawMode.LINES)
-        .build();
-
     private static final RenderLayer HIGHLIGHT_LINES_NO_DEPTH = RenderLayer.of(
         "search_highlight_lines_no_depth",
+        VertexFormats.POSITION_COLOR_NORMAL,
+        VertexFormat.DrawMode.LINES,
         1536,
-        HIGHLIGHT_LINES_NO_DEPTH_PIPELINE,
+        false,
+        false,
         RenderLayer.MultiPhaseParameters.builder()
             .lineWidth(new RenderPhase.LineWidth(OptionalDouble.empty()))
             .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
+            .transparency(RenderPhase.TRANSLUCENT)
             .target(RenderPhase.ITEM_ENTITY_TARGET)
+            .depthTest(RenderPhase.NO_DEPTH_TEST)
+            .cull(RenderPhase.NO_CULL)
+            .writeMaskState(RenderPhase.ALL_MASK)
             .build(false)
     );
 
