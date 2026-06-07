@@ -11,7 +11,6 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.example.item_retrieval.client.config.SearchRuntimeConfig;
 import org.example.item_retrieval.client.runtime.ContinuousSearchScheduler;
 import org.example.item_retrieval.client.screen.SearchScreen;
@@ -56,7 +55,7 @@ public class ItemRetrievalModClient implements ClientModInitializer {
     private static final ContinuousSearchScheduler CONTINUOUS_SEARCH_SCHEDULER =
         new ContinuousSearchScheduler(SearchRuntimeConfig.CONTINUOUS_SEARCH_INTERVAL_MS);
 
-    public static final Category CUSTOM_CATEGORY = new Category(Identifier.of(SearchRuntimeConfig.MOD_ID, "general"));
+    public static final Category CUSTOM_CATEGORY = new Category("key.categories.items-retrieval");
 
     private static KeyBinding openGuiKey;
     private static KeyBinding runSearchKey;
