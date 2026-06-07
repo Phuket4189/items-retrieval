@@ -23,35 +23,35 @@ import java.util.Set;
 import java.lang.reflect.Field;
 
 /**
- * 容器扫描器：
- * 在指定半径内遍历容器，统计目标物品命中情况，支持嵌套容器递归统计。
+ * 瀹瑰櫒鎵弿鍣細
+ * 鍦ㄦ寚瀹氬崐寰勫唴閬嶅巻瀹瑰櫒锛岀粺璁＄洰鏍囩墿鍝佸懡涓儏鍐碉紝鏀寔宓屽瀹瑰櫒閫掑綊缁熻銆?
  */
 public final class SearchScanner {
 
-    /** 马/驴真实背包字段缓存（AbstractHorseEntity#items）。 */
+    /** 椹?楠＄湡瀹炶儗鍖呭瓧娈电紦瀛橈紙AbstractHorseEntity#items锛夈€?*/
     private static Field donkeyInventoryField;
 
-    /** 检索半径（方块）。 */
+    /** 妫€绱㈠崐寰勶紙鏂瑰潡锛夈€?*/
     private volatile int searchRadiusBlocks;
 
-    /** 单次最多记录多少个命中容器。 */
+    /** 鍗曟鏈€澶氳褰曞灏戜釜鍛戒腑瀹瑰櫒銆?*/
     private final int maxResultHits;
 
-    /** 单次最多扫描方块容器数量，防止大范围卡顿。 */
+    /** 鍗曟鏈€澶氭壂鎻忔柟鍧楀鍣ㄦ暟閲忥紝闃叉澶ц寖鍥村崱椤裤€?*/
     private final int maxBlockContainersScanned;
 
-    /** 单次最多扫描实体容器数量，防止实体密集区卡顿。 */
+    /** 鍗曟鏈€澶氭壂鎻忓疄浣撳鍣ㄦ暟閲忥紝闃叉瀹炰綋瀵嗛泦鍖哄崱椤裤€?*/
     private final int maxEntityContainersScanned;
 
-    /** 嵌套容器递归层级上限。 */
+    /** 宓屽瀹瑰櫒閫掑綊灞傜骇涓婇檺銆?*/
     private final int maxNestedContainerDepth;
 
     /**
-     * @param searchRadiusBlocks 检索半径（方块）。
-     * @param maxResultHits 单次最多记录的命中容器数。
-     * @param maxBlockContainersScanned 单次最多扫描方块容器数。
-     * @param maxEntityContainersScanned 单次最多扫描实体容器数。
-     * @param maxNestedContainerDepth 嵌套容器递归深度上限。
+     * @param searchRadiusBlocks 妫€绱㈠崐寰勶紙鏂瑰潡锛夈€?
+     * @param maxResultHits 鍗曟鏈€澶氳褰曠殑鍛戒腑瀹瑰櫒鏁般€?
+     * @param maxBlockContainersScanned 鍗曟鏈€澶氭壂鎻忔柟鍧楀鍣ㄦ暟銆?
+     * @param maxEntityContainersScanned 鍗曟鏈€澶氭壂鎻忓疄浣撳鍣ㄦ暟銆?
+     * @param maxNestedContainerDepth 宓屽瀹瑰櫒閫掑綊娣卞害涓婇檺銆?
      */
     public SearchScanner(
             int searchRadiusBlocks,
@@ -78,25 +78,25 @@ public final class SearchScanner {
     }
 
     /**
-     * 扫描玩家附近方块容器并生成检索命中结果。
+     * 鎵弿鐜╁闄勮繎鏂瑰潡瀹瑰櫒骞剁敓鎴愭绱㈠懡涓粨鏋溿€?
      *
-     * @param blockEntityLookup 方块实体查询函数。
-     * @param center 扫描中心坐标（通常为玩家坐标）。
-     * @param targets 目标物品集合。
-     * @return 包含命中列表、扫描容器数、匹配总数的计算结果。
+     * @param blockEntityLookup 鏂瑰潡瀹炰綋鏌ヨ鍑芥暟銆?
+     * @param center 鎵弿涓績鍧愭爣锛堥€氬父涓虹帺瀹跺潗鏍囷級銆?
+     * @param targets 鐩爣鐗╁搧闆嗗悎銆?
+     * @return 鍖呭惈鍛戒腑鍒楄〃銆佹壂鎻忓鍣ㄦ暟銆佸尮閰嶆€绘暟鐨勮绠楃粨鏋溿€?
      */
     public SearchComputation scanNearbyContainers(BlockEntityLookup blockEntityLookup, BlockPos center, Set<Item> targets) {
         return scanNearbyContainers(blockEntityLookup, searchBounds -> List.of(), center, targets);
     }
 
     /**
-     * 扫描玩家附近"方块容器 + 实体容器"并生成检索命中结果。
+     * 鎵弿鐜╁闄勮繎鈥滄柟鍧楀鍣?+ 瀹炰綋瀹瑰櫒鈥濆苟鐢熸垚妫€绱㈠懡涓粨鏋溿€?
      *
-     * @param blockEntityLookup 方块实体查询函数。
-     * @param nearbyEntityLookup 实体查询函数（传入球形半径外包盒）。
-     * @param center 扫描中心坐标（通常为玩家坐标）。
-     * @param targets 目标物品集合。
-     * @return 包含命中列表、扫描容器数、匹配总数的计算结果。
+     * @param blockEntityLookup 鏂瑰潡瀹炰綋鏌ヨ鍑芥暟銆?
+     * @param nearbyEntityLookup 瀹炰綋鏌ヨ鍑芥暟锛堜紶鍏ョ悆褰㈠鍖呯洅锛夈€?
+     * @param center 鎵弿涓績鍧愭爣锛堥€氬父涓虹帺瀹跺潗鏍囷級銆?
+     * @param targets 鐩爣鐗╁搧闆嗗悎銆?
+     * @return 鍖呭惈鍛戒腑鍒楄〃銆佹壂鎻忓鍣ㄦ暟銆佸尮閰嶆€绘暟鐨勮绠楃粨鏋溿€?
      */
     public SearchComputation scanNearbyContainers(
             BlockEntityLookup blockEntityLookup,
@@ -189,7 +189,7 @@ public final class SearchScanner {
     }
 
     /**
-     * 对命中结果做深拷贝，避免跨线程传递时引用共享。
+     * 瀵瑰懡涓粨鏋滃仛娣辨嫹璐濓紝閬垮厤璺ㄧ嚎绋嬩紶閫掓椂寮曠敤鍏变韩銆?
      */
     public List<ContainerHit> copyHits(List<ContainerHit> hits) {
         List<ContainerHit> copied = new ArrayList<>(hits.size());
@@ -209,12 +209,12 @@ public final class SearchScanner {
         return copied;
     }
 
-    /** 汇总单个容器中目标物品匹配情况。 */
+    /** 姹囨€诲崟涓鍣ㄤ腑鐩爣鐗╁搧鍖归厤鎯呭喌銆?*/
     private InventoryMatch summarizeInventoryMatch(Inventory inventory, Set<Item> targets) {
         return summarizeContainerMatch(inventory.size(), inventory::getStack, targets);
     }
 
-    /** 汇总实体容器中目标物品匹配情况。 */
+    /** 姹囨€诲疄浣撳鍣ㄤ腑鐩爣鐗╁搧鍖归厤鎯呭喌銆?*/
     private InventoryMatch summarizeEntityInventoryMatch(Entity entity, Set<Item> targets) {
         if (entity instanceof Inventory inventory && (entity instanceof StorageMinecartEntity || entity instanceof AbstractChestBoatEntity)) {
             return summarizeInventoryMatch(inventory, targets);
@@ -226,7 +226,7 @@ public final class SearchScanner {
                 return summarizeInventoryMatch(donkeyInventory, targets);
             }
 
-            // 兜底：若反射失败则回退到映射槽位读取（可能覆盖不完整）。
+            // 鍏滃簳锛氳嫢鍙嶅皠澶辫触鍒欏洖閫€鍒版槧灏勬Ы浣嶈鍙栵紙鍙兘瑕嗙洊涓嶅畬鏁达級銆?
             return summarizeContainerMatch(
                     donkeyEntity.getInventorySize(),
                     slot -> donkeyEntity.getStackReference(slot).get(),
@@ -238,8 +238,8 @@ public final class SearchScanner {
     }
 
     /**
-     * 读取马/驴真实库存（AbstractHorseEntity#items）。
-     * 1.21.10 中 getStackReference 使用映射槽位，不等于真实库存下标。
+     * 璇诲彇椹?楠＄湡瀹炲簱瀛橈紙AbstractHorseEntity#items锛夈€?
+     * 1.21.10 涓?getStackReference 浣跨敤鏄犲皠妲戒綅锛屼笉绛変簬鐪熷疄搴撳瓨涓嬫爣銆?
      */
     private static Inventory resolveDonkeyInventory(AbstractDonkeyEntity donkeyEntity) {
         Field cachedField = donkeyInventoryField;
@@ -298,7 +298,7 @@ public final class SearchScanner {
         return fallbackField;
     }
 
-    /** 按"槽位读取函数"汇总容器匹配情况。 */
+    /** 鎸夆€滄Ы浣嶈鍙栧嚱鏁扳€濇眹鎬诲鍣ㄥ尮閰嶆儏鍐点€?*/
     private InventoryMatch summarizeContainerMatch(int slotCount, StackLookup stackLookup, Set<Item> targets) {
         int total = 0;
         ItemStack display = ItemStack.EMPTY;
@@ -318,7 +318,7 @@ public final class SearchScanner {
         return new InventoryMatch(display, total, Map.copyOf(matchedTargetCounts));
     }
 
-    /** 当前版本支持的实体容器白名单。 */
+    /** 褰撳墠鐗堟湰鏀寔鐨勫疄浣撳鍣ㄧ櫧鍚嶅崟銆?*/
     private static boolean isSupportedEntityContainer(Entity entity) {
         if (entity instanceof StorageMinecartEntity || entity instanceof AbstractChestBoatEntity) {
             return true;
@@ -328,11 +328,11 @@ public final class SearchScanner {
     }
 
     /**
-     * 汇总单个 ItemStack（含嵌套容器）匹配情况。
+     * 姹囨€诲崟涓?ItemStack锛堝惈宓屽瀹瑰櫒锛夊尮閰嶆儏鍐点€?
      *
-     * @param stack 当前堆叠。
-     * @param targets 目标物品集合。
-     * @param depth 当前递归深度。
+     * @param stack 褰撳墠鍫嗗彔銆?
+     * @param targets 鐩爣鐗╁搧闆嗗悎銆?
+     * @param depth 褰撳墠閫掑綊娣卞害銆?
      */
     private StackMatch summarizeStackMatch(ItemStack stack, Set<Item> targets, int depth) {
         if (stack.isEmpty()) {
@@ -376,8 +376,8 @@ public final class SearchScanner {
     @FunctionalInterface
     public interface BlockEntityLookup {
         /**
-         * @param pos 目标方块位置。
-         * @return 该位置的方块实体；无则返回 null。
+         * @param pos 鐩爣鏂瑰潡浣嶇疆銆?
+         * @return 璇ヤ綅缃殑鏂瑰潡瀹炰綋锛涙棤鍒欒繑鍥?null銆?
          */
         BlockEntity get(BlockPos pos);
     }
@@ -385,8 +385,8 @@ public final class SearchScanner {
     @FunctionalInterface
     public interface NearbyEntityLookup {
         /**
-         * @param searchBounds 球形半径外包盒，用于先做一次 AABB 过滤。
-         * @return 外包盒内实体列表（调用方可返回可迭代集合）。
+         * @param searchBounds 鐞冨舰鍗婂緞澶栧寘鐩掞紝鐢ㄤ簬鍏堝仛涓€娆?AABB 杩囨护銆?
+         * @return 澶栧寘鐩掑唴瀹炰綋鍒楄〃锛堣皟鐢ㄦ柟鍙繑鍥炲彲杩唬闆嗗悎锛夈€?
          */
         Iterable<Entity> get(Box searchBounds);
     }

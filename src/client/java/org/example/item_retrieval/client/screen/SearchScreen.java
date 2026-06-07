@@ -1,9 +1,11 @@
 package org.example.item_retrieval.client.screen;
 
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
@@ -385,34 +387,33 @@ public class SearchScreen extends HandledScreen<SearchScreenHandler> {
     }
 
     @Override
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT
-                && isMouseOverTargetScrollbar(mouseX, mouseY)
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT
+                && isMouseOverTargetScrollbar(click.x(), click.y())
                 && hasScrollableTargetRows()) {
             draggingTargetScrollbar = true;
-            setTargetListOffsetFromMouse(mouseY);
+            setTargetListOffsetFromMouse(click.y());
             return true;
         }
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT
-                && isMouseOverResultScrollbar(mouseX, mouseY)
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT
+                && isMouseOverResultScrollbar(click.x(), click.y())
                 && hasCurrentScrollableResults()) {
             draggingResultScrollbar = true;
-            setCurrentResultOffsetFromMouse(mouseY);
+            setCurrentResultOffsetFromMouse(click.y());
             return true;
         }
 
-        int clickedTargetSlot = getTargetSlotAt(mouseX, mouseY);
+        int clickedTargetSlot = getTargetSlotAt(click.x(), click.y());
         if (clickedTargetSlot >= 0) {
             selectedOptionIndex = clickedTargetSlot;
 
-            if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            if (click.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                 ItemRetrievalModClient.cycleSearchTargetColor(clickedTargetSlot);
                 return true;
             }
 
-            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && isMouseOverTargetToggleZone(mouseX, mouseY)) {
+            if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT && isMouseOverTargetToggleZone(click.x(), click.y())) {
                 ItemRetrievalModClient.toggleSearchTargetEnabled(clickedTargetSlot);
                 return true;
             }
@@ -420,7 +421,7 @@ public class SearchScreen extends HandledScreen<SearchScreenHandler> {
             return true;
         }
 
-        Slot clickedSlot = findHoveredSlot(mouseX, mouseY);
+        Slot clickedSlot = findHoveredSlot(click.x(), click.y());
         if (clickedSlot != null && clickedSlot.inventory == handler.getSearchResults()) {
             if (showingCatalogResults) {
                 int globalIndex = catalogResultRowOffset + clickedSlot.getIndex();
@@ -433,28 +434,26 @@ public class SearchScreen extends HandledScreen<SearchScreenHandler> {
             return true;
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
         if (draggingTargetScrollbar && hasScrollableTargetRows()) {
-            setTargetListOffsetFromMouse(mouseY);
+            setTargetListOffsetFromMouse(click.y());
             return true;
         }
 
         if (draggingResultScrollbar && hasCurrentScrollableResults()) {
-            setCurrentResultOffsetFromMouse(mouseY);
+            setCurrentResultOffsetFromMouse(click.y());
             return true;
         }
 
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, offsetX, offsetY);
     }
 
     @Override
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(Click click) {
         boolean consumed = false;
         if (draggingTargetScrollbar) {
             draggingTargetScrollbar = false;
@@ -470,7 +469,7 @@ public class SearchScreen extends HandledScreen<SearchScreenHandler> {
             return true;
         }
 
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(click);
     }
 
     @Override
@@ -497,23 +496,22 @@ public class SearchScreen extends HandledScreen<SearchScreenHandler> {
     }
 
     @Override
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput keyInput) {
         if (searchField != null
                 && searchField.isFocused()
-                && (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)) {
+                && (keyInput.key() == GLFW.GLFW_KEY_ENTER || keyInput.key() == GLFW.GLFW_KEY_KP_ENTER)) {
             runCatalogItemSearch(true);
             return true;
         }
 
         if (radiusField != null
                 && radiusField.isFocused()
-                && (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)) {
+                && (keyInput.key() == GLFW.GLFW_KEY_ENTER || keyInput.key() == GLFW.GLFW_KEY_KP_ENTER)) {
             commitRadiusFieldInput();
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(keyInput);
     }
 
     @Override
