@@ -3,15 +3,13 @@ package org.example.item_retrieval.client;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.option.KeyBinding.Category;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.example.item_retrieval.client.config.SearchRuntimeConfig;
 import org.example.item_retrieval.client.runtime.ContinuousSearchScheduler;
 import org.example.item_retrieval.client.screen.SearchScreen;
@@ -56,7 +54,7 @@ public class ItemRetrievalModClient implements ClientModInitializer {
     private static final ContinuousSearchScheduler CONTINUOUS_SEARCH_SCHEDULER =
         new ContinuousSearchScheduler(SearchRuntimeConfig.CONTINUOUS_SEARCH_INTERVAL_MS);
 
-    public static final Category CUSTOM_CATEGORY = new Category(Identifier.of(SearchRuntimeConfig.MOD_ID, "general"));
+    private static final String KEY_CATEGORY = "key.categories.items-retrieval";
 
     private static KeyBinding openGuiKey;
     private static KeyBinding runSearchKey;
@@ -68,7 +66,7 @@ public class ItemRetrievalModClient implements ClientModInitializer {
             "key.items-retrieval.open_gui",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_U,
-                CUSTOM_CATEGORY
+                KEY_CATEGORY
         ));
 
         // O：切换持续检索模式
@@ -76,7 +74,7 @@ public class ItemRetrievalModClient implements ClientModInitializer {
             "key.items-retrieval.run_search",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_O,
-                CUSTOM_CATEGORY
+                KEY_CATEGORY
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
