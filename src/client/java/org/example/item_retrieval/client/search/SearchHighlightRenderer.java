@@ -2,55 +2,35 @@ package org.example.item_retrieval.client.search;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexRendering;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.example.item_retrieval.client.config.SearchRuntimeConfig;
-import org.joml.Vector3f;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.OptionalDouble;
 import java.util.function.ToIntFunction;
 
 /**
  * 检索命中高亮渲染器：
  * 绘制容器命中框、颜色标记和方向引导线。
+ * 1.20.6 版本使用 WorldRenderer 绘制 + 简化的 RenderLayer。
  */
 public final class SearchHighlightRenderer {
 
     private static final int NO_COLOR = SearchTargetManager.NO_COLOR;
 
-    /**
-     * 单独构建一条无深度测试的线框管线，让容器/实体标记可以隔墙可见。
-     * 1.21.4 版本使用 RenderLayer.of() 直接构建，无 RenderPipeline builder API。
-     */
-    private static final RenderLayer HIGHLIGHT_LINES_NO_DEPTH = RenderLayer.of(
-        "search_highlight_lines_no_depth",
-        VertexFormats.POSITION_COLOR,
-        VertexFormat.DrawMode.LINES,
-        1536,
-        false,
-        false,
-        RenderLayer.MultiPhaseParameters.builder()
-            .lineWidth(new RenderPhase.LineWidth(OptionalDouble.empty()))
-            .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
-            .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
-            .target(RenderPhase.ITEM_ENTITY_TARGET)
-            .depthTest(RenderPhase.ALWAYS_DEPTH_TEST)
-            .writeMaskState(RenderPhase.COLOR_MASK)
-            .build(false)
-    );
+    /** 直接使用原版无深度的线条渲染层。 */
+    private static final RenderLayer HIGHLIGHT_LINES_NO_DEPTH = RenderLayer.getLines();
 
     /** 非持续模式下高亮默认持续时间（毫秒）。 */
     private final long highlightDurationMs;
@@ -167,7 +147,7 @@ public final class SearchHighlightRenderer {
                 // Custom layers are not always retained as fixed buffers, and reusing a stale
                 // consumer after switching layers can throw "Not building".
                 VertexConsumer throughWallLineConsumer = context.consumers().getBuffer(HIGHLIGHT_LINES_NO_DEPTH);
-                VertexRendering.drawBox(context.matrixStack(), throughWallLineConsumer, localBox, red, green, blue, Math.max(0.38F, alpha));
+                drawBox(context.matrixStack(), throughWallLineConsumer, localBox, red, green, blue, Math.max(0.38F, alpha));
                 drawAccentColorMarker(context, throughWallLineConsumer, localBox, renderInfo.secondaryColorArgb(), 0, alpha);
                 drawAccentColorMarker(context, throughWallLineConsumer, localBox, renderInfo.tertiaryColorArgb(), 1, alpha);
 
@@ -176,7 +156,7 @@ public final class SearchHighlightRenderer {
                 }
 
                 VertexConsumer depthLineConsumer = context.consumers().getBuffer(RenderLayer.getLines());
-                VertexRendering.drawBox(context.matrixStack(), depthLineConsumer, localBox.expand(0.001D), red, green, blue, Math.max(0.22F, alpha * 0.85F));
+                drawBox(context.matrixStack(), depthLineConsumer, localBox.expand(0.001D), red, green, blue, Math.max(0.22F, alpha * 0.85F));
             }
         } catch (IllegalStateException renderError) {
             highlightRenderDisabled = true;
@@ -212,7 +192,7 @@ public final class SearchHighlightRenderer {
         }
 
         int guideColor = withAlpha(colorArgb, Math.max(56, Math.min(255, (int) (alpha * 205.0F))));
-        VertexRendering.drawVector(context.matrixStack(), lineConsumer, new Vector3f(0.0F, 0.0F, 0.0F), direction, guideColor);
+        drawLine(context.matrixStack(), lineConsumer, 0.0F, 0.0F, 0.0F, (float) direction.x, (float) direction.y, (float) direction.z, guideColor);
     }
 
     private static void drawAccentColorMarker(
@@ -235,7 +215,7 @@ public final class SearchHighlightRenderer {
         double minZ = localBox.minZ + 0.08D;
 
         Box markerBox = new Box(minX, minY, minZ, minX + markerWidth, minY + markerHeight, minZ + markerWidth);
-        VertexRendering.drawBox(
+        drawBox(
                 context.matrixStack(),
                 lineConsumer,
                 markerBox,
@@ -244,6 +224,22 @@ public final class SearchHighlightRenderer {
                 channelToFloat(accentColorArgb, 0),
                 Math.max(0.24F, alpha * 0.72F)
         );
+    }
+
+    // ===== 1.20.6 通用绘制工具（替代 VertexRendering） =====
+
+    private static void drawBox(MatrixStack matrices, VertexConsumer consumer, Box box, float r, float g, float b, float a) {
+        WorldRenderer.drawBox(matrices, consumer, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, r, g, b, a);
+    }
+
+    private static void drawLine(MatrixStack matrices, VertexConsumer consumer, float x1, float y1, float z1, float x2, float y2, float z2, int color) {
+        Matrix4f pos = matrices.peek().getPositionMatrix();
+        float r = ((color >> 16) & 0xFF) / 255.0F;
+        float g = ((color >> 8) & 0xFF) / 255.0F;
+        float b = (color & 0xFF) / 255.0F;
+        float a = ((color >> 24) & 0xFF) / 255.0F;
+        consumer.vertex(pos, x1, y1, z1).color(r, g, b, a);
+        consumer.vertex(pos, x2, y2, z2).color(r, g, b, a);
     }
 
     private static int selectPrimaryColor(Map<Item, Integer> matchedTargetCounts, ToIntFunction<Item> colorResolver) {

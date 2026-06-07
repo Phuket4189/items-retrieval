@@ -5,7 +5,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.AbstractDonkeyEntity;
-import net.minecraft.entity.vehicle.AbstractChestBoatEntity;
+import net.minecraft.entity.vehicle.ChestBoatEntity;
 import net.minecraft.entity.vehicle.StorageMinecartEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
@@ -216,7 +216,7 @@ public final class SearchScanner {
 
     /** 汇总实体容器中目标物品匹配情况。 */
     private InventoryMatch summarizeEntityInventoryMatch(Entity entity, Set<Item> targets) {
-        if (entity instanceof Inventory inventory && (entity instanceof StorageMinecartEntity || entity instanceof AbstractChestBoatEntity)) {
+        if (entity instanceof Inventory inventory && (entity instanceof StorageMinecartEntity || entity instanceof ChestBoatEntity)) {
             return summarizeInventoryMatch(inventory, targets);
         }
 
@@ -226,9 +226,10 @@ public final class SearchScanner {
                 return summarizeInventoryMatch(donkeyInventory, targets);
             }
 
-            // 兜底：若反射失败则回退到映射槽位读取（可能覆盖不完整）。
+            // 兜底：若反射失败则回退到映射槽位读取。
+            // getInventorySize() 在 1.20.6 中为 protected，直接使用固定上限遍历。
             return summarizeContainerMatch(
-                    donkeyEntity.getInventorySize(),
+                    15,
                     slot -> donkeyEntity.getStackReference(slot).get(),
                     targets
             );
@@ -320,7 +321,7 @@ public final class SearchScanner {
 
     /** 当前版本支持的实体容器白名单。 */
     private static boolean isSupportedEntityContainer(Entity entity) {
-        if (entity instanceof StorageMinecartEntity || entity instanceof AbstractChestBoatEntity) {
+        if (entity instanceof StorageMinecartEntity || entity instanceof ChestBoatEntity) {
             return true;
         }
 
