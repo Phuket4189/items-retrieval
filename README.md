@@ -151,6 +151,10 @@ All Rights Reserved
 
 Phuket4189
 
+## 📖 开发文档
+
+- [版本差异文档](docs/VERSION_DIFFERENCES.md) — API 差异矩阵与适配指南
+
 ## 🔗 相关链接
 
 - [源码仓库](https://github.com/Phuket4189/items-retrieval)
