@@ -167,7 +167,7 @@ public final class SearchHighlightRenderer {
                 // Custom layers are not always retained as fixed buffers, and reusing a stale
                 // consumer after switching layers can throw "Not building".
                 VertexConsumer throughWallLineConsumer = context.consumers().getBuffer(HIGHLIGHT_LINES_NO_DEPTH);
-                VertexRendering.drawBox(context.matrixStack().peek(), throughWallLineConsumer, localBox, red, green, blue, Math.max(0.38F, alpha));
+                VertexRendering.drawBox(context.matrixStack(), throughWallLineConsumer, localBox, red, green, blue, Math.max(0.38F, alpha));
                 drawAccentColorMarker(context, throughWallLineConsumer, localBox, renderInfo.secondaryColorArgb(), 0, alpha);
                 drawAccentColorMarker(context, throughWallLineConsumer, localBox, renderInfo.tertiaryColorArgb(), 1, alpha);
 
@@ -176,7 +176,7 @@ public final class SearchHighlightRenderer {
                 }
 
                 VertexConsumer depthLineConsumer = context.consumers().getBuffer(RenderLayer.getLines());
-                VertexRendering.drawBox(context.matrixStack().peek(), depthLineConsumer, localBox.expand(0.001D), red, green, blue, Math.max(0.22F, alpha * 0.85F));
+                VertexRendering.drawBox(context.matrixStack(), depthLineConsumer, localBox.expand(0.001D), red, green, blue, Math.max(0.22F, alpha * 0.85F));
             }
         } catch (IllegalStateException renderError) {
             highlightRenderDisabled = true;
@@ -236,7 +236,7 @@ public final class SearchHighlightRenderer {
 
         Box markerBox = new Box(minX, minY, minZ, minX + markerWidth, minY + markerHeight, minZ + markerWidth);
         VertexRendering.drawBox(
-                context.matrixStack().peek(),
+                context.matrixStack(),
                 lineConsumer,
                 markerBox,
                 channelToFloat(accentColorArgb, 16),
