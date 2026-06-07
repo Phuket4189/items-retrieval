@@ -385,7 +385,6 @@ public class SearchScreen extends HandledScreen<SearchScreenHandler> {
     }
 
     @Override
-    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT
                 && isMouseOverTargetScrollbar(mouseX, mouseY)
@@ -437,7 +436,6 @@ public class SearchScreen extends HandledScreen<SearchScreenHandler> {
     }
 
     @Override
-    @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (draggingTargetScrollbar && hasScrollableTargetRows()) {
             setTargetListOffsetFromMouse(mouseY);
@@ -452,7 +450,6 @@ public class SearchScreen extends HandledScreen<SearchScreenHandler> {
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
-    @Override
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         boolean consumed = false;
@@ -496,7 +493,6 @@ public class SearchScreen extends HandledScreen<SearchScreenHandler> {
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
-    @Override
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (searchField != null

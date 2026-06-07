@@ -1,6 +1,6 @@
 package org.example.item_retrieval.client.search;
 
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.RenderLayer;
@@ -33,11 +33,11 @@ public final class SearchHighlightRenderer {
 
     /**
      * 单独构建一条无深度测试的线框管线，让容器/实体标记可以隔墙可见。
-     * 1.20.6 版本使用 RenderLayer.of() 直接构建，无 RenderPipeline builder API。
+     * 1.21.4 版本使用 RenderLayer.of() 直接构建，无 RenderPipeline builder API。
      */
     private static final RenderLayer HIGHLIGHT_LINES_NO_DEPTH = RenderLayer.of(
         "search_highlight_lines_no_depth",
-        VertexFormats.POSITION_COLOR_NORMAL,
+        VertexFormats.POSITION_COLOR,
         VertexFormat.DrawMode.LINES,
         1536,
         false,
@@ -45,11 +45,10 @@ public final class SearchHighlightRenderer {
         RenderLayer.MultiPhaseParameters.builder()
             .lineWidth(new RenderPhase.LineWidth(OptionalDouble.empty()))
             .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
-            .transparency(RenderPhase.TRANSLUCENT)
+            .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
             .target(RenderPhase.ITEM_ENTITY_TARGET)
-            .depthTest(RenderPhase.NO_DEPTH_TEST)
-            .cull(RenderPhase.NO_CULL)
-            .writeMaskState(RenderPhase.ALL_MASK)
+            .depthTest(RenderPhase.ALWAYS_DEPTH_TEST)
+            .writeMaskState(RenderPhase.COLOR_MASK)
             .build(false)
     );
 
@@ -126,7 +125,7 @@ public final class SearchHighlightRenderer {
             return;
         }
 
-        if (context.matrices() == null || context.consumers() == null) {
+        if (context.matrixStack() == null || context.consumers() == null) {
             return;
         }
 
@@ -168,7 +167,7 @@ public final class SearchHighlightRenderer {
                 // Custom layers are not always retained as fixed buffers, and reusing a stale
                 // consumer after switching layers can throw "Not building".
                 VertexConsumer throughWallLineConsumer = context.consumers().getBuffer(HIGHLIGHT_LINES_NO_DEPTH);
-                VertexRendering.drawBox(context.matrices().peek(), throughWallLineConsumer, localBox, red, green, blue, Math.max(0.38F, alpha));
+                VertexRendering.drawBox(context.matrixStack(), throughWallLineConsumer, localBox, red, green, blue, Math.max(0.38F, alpha));
                 drawAccentColorMarker(context, throughWallLineConsumer, localBox, renderInfo.secondaryColorArgb(), 0, alpha);
                 drawAccentColorMarker(context, throughWallLineConsumer, localBox, renderInfo.tertiaryColorArgb(), 1, alpha);
 
@@ -177,7 +176,7 @@ public final class SearchHighlightRenderer {
                 }
 
                 VertexConsumer depthLineConsumer = context.consumers().getBuffer(RenderLayer.getLines());
-                VertexRendering.drawBox(context.matrices().peek(), depthLineConsumer, localBox.expand(0.001D), red, green, blue, Math.max(0.22F, alpha * 0.85F));
+                VertexRendering.drawBox(context.matrixStack(), depthLineConsumer, localBox.expand(0.001D), red, green, blue, Math.max(0.22F, alpha * 0.85F));
             }
         } catch (IllegalStateException renderError) {
             highlightRenderDisabled = true;
@@ -213,7 +212,7 @@ public final class SearchHighlightRenderer {
         }
 
         int guideColor = withAlpha(colorArgb, Math.max(56, Math.min(255, (int) (alpha * 205.0F))));
-        VertexRendering.drawVector(context.matrices(), lineConsumer, new Vector3f(0.0F, 0.0F, 0.0F), direction, guideColor);
+        VertexRendering.drawVector(context.matrixStack(), lineConsumer, new Vector3f(0.0F, 0.0F, 0.0F), direction, guideColor);
     }
 
     private static void drawAccentColorMarker(
@@ -237,7 +236,7 @@ public final class SearchHighlightRenderer {
 
         Box markerBox = new Box(minX, minY, minZ, minX + markerWidth, minY + markerHeight, minZ + markerWidth);
         VertexRendering.drawBox(
-                context.matrices().peek(),
+                context.matrixStack(),
                 lineConsumer,
                 markerBox,
                 channelToFloat(accentColorArgb, 16),
