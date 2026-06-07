@@ -1,10 +1,30 @@
 # Items Retrieval
 
-[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.10-green)](https://www.minecraft.net/)
-[![Fabric Loader](https://img.shields.io/badge/Fabric%20Loader-0.18.1-blue)](https://fabricmc.net/)
 [![Java Version](https://img.shields.io/badge/Java-21-orange)](https://www.oracle.com/java/)
+[![Fabric](https://img.shields.io/badge/Fabric-Loader-blue)](https://fabricmc.net/)
 
 > 客户端物品检索辅助模组。打开检索面板后添加要查找的物品，点击执行附近检索或开启持续检索，即可查看附近命中容器并获得高亮与方向提示。
+
+## 🗂️ 支持版本
+
+| Minecraft 版本 | 分支 | 状态 |
+|---------------|------|------|
+| **1.21.10** | [`mc/1.21.10`](../../tree/mc/1.21.10) | ✅ 主开发版本 |
+| **1.21.4** | [`mc/1.21.4`](../../tree/mc/1.21.4) | ✅ 已适配 |
+| **1.21** | [`mc/1.21`](../../tree/mc/1.21) | ✅ 已适配 |
+| **1.20.6** | [`mc/1.20.6`](../../tree/mc/1.20.6) | ✅ 已适配 |
+
+> 每个版本拥有独立分支，源码与构建配置完全隔离。请切换到对应分支进行构建。
+
+### 克隆特定版本
+
+```bash
+# 克隆仓库后切换到目标版本分支
+git clone https://github.com/Phuket4189/items-retrieval.git
+cd items-retrieval
+git checkout mc/1.21.4    # 例如：切换到 1.21.4 版本
+./gradlew build
+```
 
 ## 📋 功能特性
 
@@ -28,15 +48,29 @@
 | `U` | 打开/关闭检索面板 |
 | `O` | 执行单次附近检索 / 切换持续检索模式 |
 
+## 🏗️ 分支策略
+
+本项目采用企业级 Git 分支管理：
+
+```
+main           ← 项目总览（当前分支，不含版本源码）
+├── mc/1.21.10 ← Minecraft 1.21.10（主开发版本）
+├── mc/1.21.4  ← Minecraft 1.21.4
+├── mc/1.21    ← Minecraft 1.21
+└── mc/1.20.6  ← Minecraft 1.20.6
+```
+
+- **`main`** — 项目入口，包含 README、文档、Issue 模板等通用文件
+- **`mc/X.Y.Z`** — 版本分支，各自独立维护源码、构建配置和依赖版本
+
 ## 🔧 技术栈
 
 | 类别 | 技术 |
 |------|------|
-| **游戏版本** | Minecraft 1.21.10 |
-| **Mod Loader** | Fabric Loader 0.18.1 |
-| **Mod API** | Fabric API 0.138.4+1.21.10 |
+| **Mod Loader** | Fabric |
+| **Mod API** | Fabric API |
 | **编程语言** | Java 21 |
-| **映射** | Yarn 1.21.10+build.3 |
+| **映射** | Yarn |
 | **构建工具** | Gradle + fabric-loom |
 | **代码注入** | Mixin |
 | **输入处理** | LWJGL / GLFW |
