@@ -12,8 +12,8 @@ import java.util.Set;
 import java.util.HashSet;
 
 /**
- * 妫€绱㈢洰鏍囩鐞嗗櫒锛?
- * 缁存姢鐩爣姹犮€佸惎鐢ㄧ姸鎬併€侀鑹查厤缃€佹绱㈢粨鏋滃垎椤典笌灞曠ず搴撳瓨銆?
+ * 检索目标管理器：
+ * 维护目标池、启用状态、颜色配置、检索结果分页与展示库存。
  */
 public final class SearchTargetManager {
 
@@ -31,33 +31,33 @@ public final class SearchTargetManager {
             0xFFC77DFF
     };
 
-    /** 宸︿晶鐩爣姹犲簱瀛樸€?*/
+    /** 左侧目标池库存。 */
     private final SimpleInventory searchOptions;
 
-    /** 涓儴缁撴灉灞曠ず搴撳瓨銆?*/
+    /** 中部结果展示库存。 */
     private final SimpleInventory searchResults;
 
-    /** 姣忎釜鐩爣鐗╁搧瀵瑰簲鐨勯珮浜鑹层€?*/
+    /** 每个目标物品对应的高亮颜色。 */
     private final Map<Item, Integer> targetItemColors = new HashMap<>();
 
-    /** 姣忎釜鐩爣鐗╁搧鏄惁鍚敤妫€绱€?*/
+    /** 每个目标物品是否启用检索。 */
     private final Map<Item, Boolean> targetItemEnabled = new HashMap<>();
 
-    /** 鏈€鏂颁竴娆℃绱㈠懡涓垪琛紙鐢ㄤ簬鍒嗛〉鏄剧ず锛夈€?*/
+    /** 最新一次检索命中列表（用于分页显示）。 */
     private List<SearchScanner.ContainerHit> latestSearchHits = List.of();
 
-    /** 寰呮坊鍔犵洰鏍囩殑榛樿棰滆壊銆?*/
+    /** 待添加目标的默认颜色。 */
     private int pendingTargetColor = TARGET_HIGHLIGHT_COLORS[0];
 
-    /** 涓嬩竴娆″彇鑹叉澘棰滆壊鐨勭储寮曘€?*/
+    /** 下一次取色板颜色的索引。 */
     private int nextPaletteColorIndex = 1;
 
-    /** 褰撳墠缁撴灉鍒嗛〉鍋忕Щ锛堟寜鍒楀榻愶紝鍗曚綅锛氭Ы浣嶏級銆?*/
+    /** 当前结果分页偏移（按列对齐，单位：槽位）。 */
     private int searchResultRowOffset = 0;
 
     /**
-     * @param optionSlotCount 鐩爣姹犲閲忋€?
-     * @param resultSlotCount 缁撴灉灞曠ず妲戒綅鏁伴噺銆?
+     * @param optionSlotCount 目标池容量。
+     * @param resultSlotCount 结果展示槽位数量。
      */
     public SearchTargetManager(int optionSlotCount, int resultSlotCount) {
         this.searchOptions = new SimpleInventory(optionSlotCount);
@@ -72,16 +72,16 @@ public final class SearchTargetManager {
         return searchResults;
     }
 
-    /** 浣跨敤褰撳墠寰呮坊鍔犻鑹叉柊澧炵洰鏍囥€?*/
+    /** 使用当前待添加颜色新增目标。 */
     public boolean addSearchTarget(ItemStack sourceStack) {
         return addSearchTarget(sourceStack, pendingTargetColor);
     }
 
     /**
-     * 鏂板鐩爣骞舵寚瀹氶鑹层€?
+     * 新增目标并指定颜色。
      *
-     * @param sourceStack 鏉ユ簮鍫嗗彔锛堝彧鍙?item锛屾暟閲忕粺涓€涓?1锛夈€?
-     * @param colorArgb 鎸囧畾楂樹寒棰滆壊銆?
+     * @param sourceStack 来源堆叠（只取 item，数量统一为 1）。
+     * @param colorArgb 指定高亮颜色。
      */
     public boolean addSearchTarget(ItemStack sourceStack, int colorArgb) {
         if (sourceStack.isEmpty()) {
@@ -110,7 +110,7 @@ public final class SearchTargetManager {
         return false;
     }
 
-    /** 鎸夌储寮曠Щ闄ょ洰鏍囥€?*/
+    /** 按索引移除目标。 */
     public boolean removeSearchTarget(int index) {
         if (index < 0 || index >= searchOptions.size()) {
             return false;
@@ -129,7 +129,7 @@ public final class SearchTargetManager {
         return true;
     }
 
-    /** 鏌ヨ鐩爣妲戒綅鏄惁鍚敤銆?*/
+    /** 查询目标槽位是否启用。 */
     public boolean isSearchTargetEnabled(int slotIndex) {
         if (slotIndex < 0 || slotIndex >= searchOptions.size()) {
             return false;
@@ -143,7 +143,7 @@ public final class SearchTargetManager {
         return targetItemEnabled.getOrDefault(stack.getItem(), true);
     }
 
-    /** 鍒囨崲鐩爣妲戒綅鐨勫惎鐢ㄧ姸鎬併€?*/
+    /** 切换目标槽位的启用状态。 */
     public boolean toggleSearchTargetEnabled(int slotIndex) {
         if (slotIndex < 0 || slotIndex >= searchOptions.size()) {
             return false;
@@ -161,7 +161,7 @@ public final class SearchTargetManager {
         return true;
     }
 
-    /** @return 褰撳墠鐩爣鎬绘暟锛堝惈鍚敤涓庣鐢級銆?*/
+    /** @return 当前目标总数（含启用与禁用）。 */
     public int getSearchTargetCount() {
         int count = 0;
         for (int i = 0; i < searchOptions.size(); i++) {
@@ -172,7 +172,7 @@ public final class SearchTargetManager {
         return count;
     }
 
-    /** @return 褰撳墠鍚敤鐩爣鏁伴噺銆?*/
+    /** @return 当前启用目标数量。 */
     public int getEnabledSearchTargetCount() {
         int count = 0;
         for (int i = 0; i < searchOptions.size(); i++) {
@@ -227,7 +227,7 @@ public final class SearchTargetManager {
     }
 
     /**
-     * 鏀堕泦鈥滃惎鐢ㄧ姸鎬佲€濈殑鐩爣闆嗗悎锛岀敤浜庡疄闄呮绱€?
+     * 收集"启用状态"的目标集合，用于实际检索。
      */
     public Set<Item> collectTargetItems() {
         Set<Item> targets = new HashSet<>();
@@ -257,7 +257,7 @@ public final class SearchTargetManager {
     }
 
     /**
-     * 搴旂敤涓€娆℃柊鐨勬绱㈢粨鏋滐紝骞堕噸缃垎椤靛埌绗竴椤点€?
+     * 应用一次新的检索结果，并重置分页到第一页。
      */
     public void applySearchResults(List<SearchScanner.ContainerHit> hits) {
         latestSearchHits = List.copyOf(hits);
