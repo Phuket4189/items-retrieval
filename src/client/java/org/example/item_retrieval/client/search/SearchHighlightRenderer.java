@@ -24,16 +24,16 @@ import java.util.OptionalDouble;
 import java.util.function.ToIntFunction;
 
 /**
- * 妫€绱㈠懡涓珮浜覆鏌撳櫒锛?
- * 缁樺埗瀹瑰櫒鍛戒腑妗嗐€侀鑹叉爣璁板拰鏂瑰悜寮曞绾裤€?
+ * 检索命中高亮渲染器：
+ * 绘制容器命中框、颜色标记和方向引导线。
  */
 public final class SearchHighlightRenderer {
 
     private static final int NO_COLOR = SearchTargetManager.NO_COLOR;
 
     /**
-     * 鍗曠嫭鏋勫缓涓€鏉℃棤娣卞害娴嬭瘯鐨勭嚎妗嗙绾匡紝璁╁鍣?瀹炰綋鏍囪鍙互闅斿鍙銆?
-     * 1.20.6 鐗堟湰浣跨敤 RenderLayer.of() 鐩存帴鏋勫缓锛屾棤 RenderPipeline builder API銆?
+     * 单独构建一条无深度测试的线框管线，让容器/实体标记可以隔墙可见。
+     * 1.20.6 版本使用 RenderLayer.of() 直接构建，无 RenderPipeline builder API。
      */
     private static final RenderLayer HIGHLIGHT_LINES_NO_DEPTH = RenderLayer.of(
         "search_highlight_lines_no_depth",
@@ -53,46 +53,46 @@ public final class SearchHighlightRenderer {
             .build(false)
     );
 
-    /** 闈炴寔缁ā寮忎笅楂樹寒榛樿鎸佺画鏃堕棿锛堟绉掞級銆?*/
+    /** 非持续模式下高亮默认持续时间（毫秒）。 */
     private final long highlightDurationMs;
 
-    /** 鍚屾椂鏄剧ず鐨勬柟鍚戝紩瀵肩嚎鏁伴噺涓婇檺銆?*/
+    /** 同时显示的方向引导线数量上限。 */
     private final int maxDirectionGuideLines;
 
-    /** 褰撳墠婵€娲婚珮浜泦鍚堛€?*/
+    /** 当前激活高亮集合。 */
     private final List<ActiveHighlight> activeHighlights = new ArrayList<>();
 
     private boolean highlightRenderDisabled = false;
     private boolean persistentHighlights = false;
 
     /**
-     * @param highlightDurationMs 闈炴寔缁ā寮忎笅楂樹寒鎸佺画鏃堕暱锛堟绉掞級銆?
-     * @param maxDirectionGuideLines 鏂瑰悜寮曞绾挎暟閲忎笂闄愩€?
+     * @param highlightDurationMs 非持续模式下高亮持续时长（毫秒）。
+     * @param maxDirectionGuideLines 方向引导线数量上限。
      */
     public SearchHighlightRenderer(long highlightDurationMs, int maxDirectionGuideLines) {
         this.highlightDurationMs = highlightDurationMs;
         this.maxDirectionGuideLines = maxDirectionGuideLines;
     }
 
-    /** 娓呯┖褰撳墠鎵€鏈夐珮浜€?*/
+    /** 清空当前所有高亮。 */
     public void clear() {
         activeHighlights.clear();
     }
 
     /**
-     * 璁剧疆鏄惁鍚敤鈥滄寔缁珮浜ā寮忊€濄€?
-     * 鎸佺画妯″紡涓嬩笉鎸?expiresAt 鑷姩绉婚櫎锛岃€屾槸绛変笅涓€杞绱㈢粨鏋滆鐩栥€?
+     * 设置是否启用"持续高亮模式"。
+     * 持续模式下不按 expiresAt 自动移除，而是等下一轮检索结果覆盖。
      */
     public void setPersistentHighlights(boolean persistentHighlights) {
         this.persistentHighlights = persistentHighlights;
     }
 
     /**
-     * 鏍规嵁妫€绱㈠懡涓粨鏋滃埛鏂伴珮浜垪琛ㄣ€?
+     * 根据检索命中结果刷新高亮列表。
      *
-     * @param hits 鍛戒腑瀹瑰櫒鍒楄〃銆?
-     * @param expiresAtMs 璇ユ壒楂樹寒鐨勮繃鏈熸椂闂淬€?
-     * @param colorResolver 鐩爣鐗╁搧鍒伴鑹茬殑瑙ｆ瀽鍑芥暟銆?
+     * @param hits 命中容器列表。
+     * @param expiresAtMs 该批高亮的过期时间。
+     * @param colorResolver 目标物品到颜色的解析函数。
      */
     public void applyHighlights(List<SearchScanner.ContainerHit> hits, long expiresAtMs, ToIntFunction<Item> colorResolver) {
         highlightRenderDisabled = false;
@@ -114,7 +114,7 @@ public final class SearchHighlightRenderer {
         }
     }
 
-    /** 鍦ㄤ笘鐣屾覆鏌撻樁娈电粯鍒堕珮浜€?*/
+    /** 在世界渲染阶段绘制高亮。 */
     public void render(WorldRenderContext context) {
         if (highlightRenderDisabled || activeHighlights.isEmpty()) {
             return;

@@ -119,4 +119,4 @@ Phuket4189
 
 ## 🔗 相关链接
 
-- [源码仓库](https://github.com/Phuket4189/item-retrieval-template-1.21.10)
+- [源码仓库](https://github.com/Phuket4189/items-retrieval)
